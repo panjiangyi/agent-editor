@@ -17,6 +17,7 @@ export type AppState = {
   onConnect: OnConnect;
   setNodes: (nodes: AppNode[]) => void;
   setEdges: (edges: Edge[]) => void;
+  reset(): void;
   addBranch: (type: ComponentType, parentId: string, exp?: string) => void;
   onChange: (id: string, value: string | File) => void;
 };

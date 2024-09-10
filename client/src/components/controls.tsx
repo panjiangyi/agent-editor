@@ -57,7 +57,8 @@ export const Controls: React.FC<{
   onAddTextModel: (exp?: string) => void;
   onAddImageModel: (exp?: string) => void;
   onSave: () => void;
-}> = ({ onAddTextModel, onAddImageModel, onSave }) => {
+  onReset: () => void;
+}> = ({ onAddTextModel, onAddImageModel, onSave, onReset }) => {
   const [open, setOpen] = useState(false);
   const [type, setType] = useState<ComponentType>("TextModel");
   return (
@@ -77,9 +78,10 @@ export const Controls: React.FC<{
             setOpen(true);
           }}
         >
-          Add a image model
+          Add an image model
         </button>
-        <button onClick={onSave}>save</button>
+        <button onClick={onSave}>Run</button>
+        <button onClick={onReset}>Reset</button>
       </div>
       <ExpressionEditor
         open={open}

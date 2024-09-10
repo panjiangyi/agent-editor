@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import {
   addEdge,
   applyNodeChanges,
@@ -15,76 +16,87 @@ import axios from "axios";
 import _ from "lodash";
 
 // this is our useStore hook that we can use in our components to get parts of the store and call actions
-const useStore = create<AppState>((set, get) => ({
-  nodes: initialNodes,
-  edges: initialEdges,
-  onNodesChange: (changes) => {
-    set({
-      nodes: applyNodeChanges(changes, get().nodes),
-    });
-  },
-  onEdgesChange: (changes) => {
-    set({
-      edges: applyEdgeChanges(changes, get().edges),
-    });
-  },
-  onConnect: (connection) => {
-    set({
-      edges: addEdge(connection, get().edges),
-    });
-  },
-  setNodes: (nodes) => {
-    set({ nodes });
-  },
-  setEdges: (edges) => {
-    set({ edges });
-  },
-  onChange(id, value) {
-    set((store) => {
-      return {
-        nodes: store.nodes.map((node) => {
-          if (node.id !== id) return node;
+const useStore = create(
+  persist<AppState>(
+    (set, get) => ({
+      nodes: initialNodes,
+      edges: initialEdges,
+      onNodesChange: (changes) => {
+        set({
+          nodes: applyNodeChanges(changes, get().nodes),
+        });
+      },
+      onEdgesChange: (changes) => {
+        set({
+          edges: applyEdgeChanges(changes, get().edges),
+        });
+      },
+      onConnect: (connection) => {
+        set({
+          edges: addEdge(connection, get().edges),
+        });
+      },
+      setNodes: (nodes) => {
+        set({ nodes });
+      },
+      reset: () => {
+        set({ nodes: initialNodes, edges: initialEdges });
+      },
+      setEdges: (edges) => {
+        set({ edges });
+      },
+      onChange(id, value) {
+        set((store) => {
           return {
-            ...node,
-            data: {
-              ...node.data,
-              value,
-            },
+            nodes: store.nodes.map((node) => {
+              if (node.id !== id) return node;
+              return {
+                ...node,
+                data: {
+                  ...node.data,
+                  value,
+                },
+              };
+            }),
           };
-        }),
-      };
-    });
-  },
-  addBranch(type, parentId, exp) {
-    const nodes = get().nodes;
-    const index = nodes.length;
-    const id = uuid();
-    set((store) => {
-      return {
-        nodes: [
-          ...nodes,
-          {
-            id,
-            position: { x: 0, y: 400 * index },
-            type,
-            data: {
-              value: "",
-              if: exp,
-            },
-          },
-        ],
-        edges: [
-          ...store.edges,
-          {
-            id: `edge-${uuid()}`,
-            source: parentId,
-            target: id,
-          },
-        ],
-      };
-    });
-  },
-}));
+        });
+      },
+      addBranch(type, parentId, exp) {
+        const nodes = get().nodes;
+        const index = nodes.length;
+        const id = uuid();
+        set((store) => {
+          return {
+            nodes: [
+              ...nodes,
+              {
+                id,
+                position: { x: 0, y: 400 * index },
+                type,
+                data: {
+                  value: "",
+                  if: exp,
+                },
+              },
+            ],
+            edges: [
+              ...store.edges,
+              {
+                id: `edge-${uuid()}`,
+                source: parentId,
+                target: id,
+              },
+            ],
+          };
+        });
+      },
+    }),
+    {
+      name: "pages-data",
+      getStorage: () => localStorage,
+    }
+  )
+);
 
 export default useStore;
 

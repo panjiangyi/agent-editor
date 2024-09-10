@@ -8,12 +8,10 @@ import {
 import TextModel from "./components/text.tsx";
 import ImageModel from "./components/image.tsx";
 import "@xyflow/react/dist/style.css";
-import _ from "lodash";
 
 import useStore, {
   buildTree,
   runModels,
-  uploadFiles,
   useResultStore,
 } from "./controller/store";
 import { Controls } from "./components/controls.tsx";
@@ -24,35 +22,23 @@ const nodeTypes = {
 };
 
 const Flow = () => {
-  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, addBranch } =
-    useStore();
+  const {
+    nodes,
+    edges,
+    reset,
+    onNodesChange,
+    onEdgesChange,
+    onConnect,
+    addBranch,
+  } = useStore();
 
   const { saveResult } = useResultStore();
   return (
     <>
       <Controls
+        onReset={reset}
         onSave={async () => {
-          const images = _.compact(
-            nodes.map((node) => {
-              if (node.data.value instanceof File) {
-                return node.data.value;
-              }
-            })
-          );
-          const file2UrlMap = await uploadFiles(images);
-          const processedNodes = nodes.map((node) => {
-            if (node.data.value instanceof File) {
-              return {
-                ...node,
-                data: {
-                  ...node.data,
-                  value: file2UrlMap.get(node.data.value),
-                },
-              };
-            }
-            return node;
-          });
-          const tree = buildTree(processedNodes, edges);
+          const tree = buildTree(nodes, edges);
           const resultMap = await runModels(tree);
           saveResult(resultMap);
         }}

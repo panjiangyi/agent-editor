@@ -1,33 +1,33 @@
 import { Handle, Position } from "@xyflow/react";
-import { FC, useEffect, useRef, useState } from "react";
+import { FC, useRef } from "react";
 import { Node } from "@xyflow/react";
 
 import { Upload } from "lucide-react";
+import { uploadFiles } from "../controller/store";
+import clsx from "clsx";
+import useStore from "../controller/store";
 
 interface ImageUploadComponentProps {
-  value: File | null;
-  onChange: (file: File | null) => void;
+  selected?: boolean;
+  value: string | null;
+  onChange: (url: string | null) => void;
 }
 
-function ImageUploadComponent({ value, onChange }: ImageUploadComponentProps) {
-  const [preview, setPreview] = useState<string | null>(null);
+function ImageUploadComponent({
+  value,
+  onChange,
+  selected,
+}: ImageUploadComponentProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (value) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreview(reader.result as string);
-      };
-      reader.readAsDataURL(value);
-    } else {
-      setPreview(null);
-    }
-  }, [value]);
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0] || null;
-    onChange(file);
+    if (file == null) return;
+    const url = (await uploadFiles([file])).get(file);
+    if (url == null) return;
+    onChange(url);
   };
 
   const handleUploadClick = () => {
@@ -35,12 +35,19 @@ function ImageUploadComponent({ value, onChange }: ImageUploadComponentProps) {
   };
 
   return (
-    <div className="w-64 aspect-square bg-gray-100 flex flex-col items-center justify-center p-4 rounded-lg shadow-md">
+    <div
+      className={clsx(
+        "w-64 aspect-square bg-gray-100 flex flex-col items-center justify-center p-4 rounded-lg shadow-md",
+        {
+          "outline-black outline outline-1": selected,
+        }
+      )}
+    >
       <div className="text-lg font-semibold mb-2">Image</div>
       <div className="w-full h-40 bg-gray-200 rounded mb-2 flex items-center justify-center overflow-hidden">
-        {preview ? (
+        {value ? (
           <img
-            src={preview}
+            src={value}
             alt="Preview"
             className="w-full h-full object-cover"
           />
@@ -62,33 +69,14 @@ function ImageUploadComponent({ value, onChange }: ImageUploadComponentProps) {
   );
 }
 
-function createFileList(files: File[]) {
-  // 创建一个 DataTransfer 对象
-  const dataTransfer = new DataTransfer();
-
-  // 将传入的每个 File 对象添加到 DataTransfer 对象中
-  files.forEach((file) => {
-    dataTransfer.items.add(file);
-  });
-
-  // 返回类似 FileList 的对象
-  return dataTransfer.files;
-}
-
 const ImageModel$1: FC<{
-  value: File;
-  onChange(v: File | null): void;
-}> = ({ onChange, value }) => {
-  const ref = useRef<HTMLInputElement | null>(null);
-  useEffect(() => {
-    if (ref.current == null) return;
-    if (value == null) return;
-    ref.current.files = createFileList([value]);
-  }, [value]);
+  value: string;
+  onChange(v: string | null): void;
+}> = ({ onChange, value, ...rest }) => {
   return (
     <>
       <Handle onConnect={console.log} type="target" position={Position.Top} />
-      <ImageUploadComponent value={value} onChange={onChange} />
+      <ImageUploadComponent value={value} onChange={onChange} {...rest} />
       <Handle type="source" position={Position.Bottom} id="a" />
       <Handle type="source" position={Position.Bottom} id="b" />
     </>
@@ -96,13 +84,15 @@ const ImageModel$1: FC<{
 };
 
 const ImageModel: FC<Node> = (prop) => {
-  const value = prop.data.value as File;
+  const value = prop.data.value as string;
+  const { onChange } = useStore();
   return (
     <ImageModel$1
       {...prop}
       value={value}
-      onChange={(v) => {
-        prop.data.value = v;
+      onChange={async (v) => {
+        if (v == null) return;
+        onChange(prop.id, v);
       }}
     ></ImageModel$1>
   );
