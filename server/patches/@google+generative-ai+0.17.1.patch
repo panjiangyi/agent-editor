@@ -1,0 +1,84 @@
+diff --git a/node_modules/@google/generative-ai/dist/index.js b/node_modules/@google/generative-ai/dist/index.js
+index 67a7364..5d8568a 100644
+--- a/node_modules/@google/generative-ai/dist/index.js
++++ b/node_modules/@google/generative-ai/dist/index.js
+@@ -365,18 +365,31 @@ fetchFn = fetch) {
+     return makeRequest(url, fetchOptions, fetchFn);
+ }
+ async function makeRequest(url, fetchOptions, fetchFn = fetch) {
++    const { ProxyAgent } = require('undici');
+     let response;
+     try {
+-        response = await fetchFn(url, fetchOptions);
+-    }
+-    catch (e) {
+-        handleResponseError(e, url);
++      const proxyHost = "127.0.0.1";
++      const proxyPort = `7890`;
++      const proxyUrl = `http://${proxyHost}:${proxyPort}`;
++      const client = new ProxyAgent(proxyUrl);
++      response = await fetch(url.toString(), {
++        ...fetchOptions,
++        method: "POST",
++        headers: {
++          "Content-Type": "application/json",
++          "x-goog-api-client": getClientHeaders(),
++          "x-goog-api-key": process.env.GEMINI_API_KEY??"AIzaSyBR1Od8DL_fXgCkDAXuxZXhOysJA3oXESk",
++        },
++        dispatcher: client,
++      });
++    } catch (e) {
++      handleResponseError(e, url);
+     }
+     if (!response.ok) {
+-        await handleResponseNotOk(response, url);
++      await handleResponseNotOk(response, url);
+     }
+     return response;
+-}
++  }
+ function handleResponseError(e, url) {
+     let err = e;
+     if (!(e instanceof GoogleGenerativeAIFetchError ||
+diff --git a/node_modules/@google/generative-ai/dist/server/index.js b/node_modules/@google/generative-ai/dist/server/index.js
+index 945ae2c..0eeea06 100644
+--- a/node_modules/@google/generative-ai/dist/server/index.js
++++ b/node_modules/@google/generative-ai/dist/server/index.js
+@@ -91,18 +91,31 @@ function getClientHeaders(requestOptions) {
+     return clientHeaders.join(" ");
+ }
+ async function makeRequest(url, fetchOptions, fetchFn = fetch) {
++    const { ProxyAgent } = require('undici');
+     let response;
+     try {
+-        response = await fetchFn(url, fetchOptions);
+-    }
+-    catch (e) {
+-        handleResponseError(e, url);
++      const proxyHost = "127.0.0.1";
++      const proxyPort = `7890`;
++      const proxyUrl = `http://${proxyHost}:${proxyPort}`;
++      const client = new ProxyAgent(proxyUrl);
++      response = await fetch(url.toString(), {
++        ...fetchOptions,
++        method: "POST",
++        headers: {
++          "Content-Type": "application/json",
++          "x-goog-api-client": getClientHeaders(),
++          "x-goog-api-key": process.env.GEMINI_API_KEY??"AIzaSyBR1Od8DL_fXgCkDAXuxZXhOysJA3oXESk",
++        },
++        dispatcher: client,
++      });
++    } catch (e) {
++      handleResponseError(e, url);
+     }
+     if (!response.ok) {
+-        await handleResponseNotOk(response, url);
++      await handleResponseNotOk(response, url);
+     }
+     return response;
+-}
++  }
+ function handleResponseError(e, url) {
+     let err = e;
+     if (!(e instanceof GoogleGenerativeAIFetchError ||

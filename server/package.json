@@ -1,5 +1,6 @@
 {
   "scripts": {
+    // "postinstall": "patch-package",
     "start": "node index.js"
   },
   "engines": {
@@ -14,5 +15,8 @@
     "koa": "^2.15.3",
     "koa-body": "^6.0.1",
     "undici": "^6.19.8"
+  },
+  "devDependencies": {
+    "patch-package": "^8.0.0"
   }
 }
