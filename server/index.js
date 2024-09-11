@@ -59,9 +59,8 @@ async function modelHandler(ctx) {
   const nodes = ctx.request.body.data;
 
   let resultMap = {};
-  let lastResult;
 
-  async function traverseTree(node) {
+  async function traverseTree(node, lastResult) {
     // 输出当前节点的 data.value
     const type = node.type;
     console.log("start---", type);
@@ -81,11 +80,14 @@ async function modelHandler(ctx) {
       for (let child of node.children) {
         const hasCondition = !!child.data.if;
         if (hasCondition) {
-          if (eval(child.data?.if?.replace("{output}", lastResult))) {
-            await traverseTree(child);
+          const conditionResult = eval(
+            child.data?.if?.replace("{output}", lastResult)
+          );
+          if (conditionResult) {
+            await traverseTree(child, lastResult);
           }
         } else {
-          await traverseTree(child);
+          await traverseTree(child, lastResult);
         }
       }
     }
