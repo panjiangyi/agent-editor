@@ -1,4 +1,10 @@
 {
+  "scripts": {
+    "start": "node index.js"
+  },
+  "engines": {
+    "node": "14.x"
+  },
   "dependencies": {
     "@google/generative-ai": "^0.17.1",
     "@koa/cors": "^5.0.0",
