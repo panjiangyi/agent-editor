@@ -79,12 +79,18 @@ function ImageUploadComponent({
 
 const ImageModel$1: FC<{
   value: string;
+  id: string;
   onChange(v: string | null): void;
-}> = ({ onChange, value, ...rest }) => {
+}> = ({ onChange, value, id, ...rest }) => {
   return (
     <>
       <Handle onConnect={console.log} type="target" position={Position.Top} />
-      <ImageUploadComponent value={value} onChange={onChange} {...rest} />
+      <ImageUploadComponent
+        id={id}
+        value={value}
+        onChange={onChange}
+        {...rest}
+      />
       <Handle type="source" position={Position.Bottom} id="a" />
       <Handle type="source" position={Position.Bottom} id="b" />
     </>
