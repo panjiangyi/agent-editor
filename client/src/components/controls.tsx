@@ -36,6 +36,9 @@ const ExpressionEditor: FC<{
             placeholder="Enter expression"
             className="mb-4"
           />
+          <div className="text-gray-500 text-xs py-2">
+            {`Using {output} to represent the result`}
+          </div>
           <div className="flex justify-end space-x-2">
             <button onClick={() => onClose()}>Cancel</button>
             <button
