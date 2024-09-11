@@ -56,11 +56,12 @@ const ExpressionEditor: FC<{
 export const Controls: React.FC<{
   onAddTextModel: (exp?: string) => void;
   onAddImageModel: (exp?: string) => void;
-  onSave: () => void;
+  onSave: () => Promise<void>;
   onReset: () => void;
 }> = ({ onAddTextModel, onAddImageModel, onSave, onReset }) => {
   const [open, setOpen] = useState(false);
   const [type, setType] = useState<ComponentType>("TextModel");
+  const [loading, setLoading] = useState(false);
   return (
     <>
       <div style={{ display: "flex", gap: 10 }}>
@@ -80,7 +81,19 @@ export const Controls: React.FC<{
         >
           Add an image model
         </button>
-        <button onClick={onSave}>Run</button>
+        <button
+          onClick={async () => {
+            setLoading(true);
+            try {
+              await onSave();
+            } catch (error) {
+              console.error(error);
+            }
+            setLoading(false);
+          }}
+        >
+          {loading ? "Running" : "Run"}
+        </button>
         <button onClick={onReset}>Reset</button>
       </div>
       <ExpressionEditor
