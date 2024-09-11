@@ -28,7 +28,7 @@ function uploadHandler(ctx) {
 
   if (file) {
     const fileName = path.basename(file.filepath); // 从临时路径中获取文件名
-    const fileUrl = `${ctx.origin}/uploads/${fileName}`; // 构建图片的URL
+    const fileUrl = `${ctx.origin}/api/uploads/${fileName}`; // 构建图片的URL
 
     ctx.body = {
       status: "success",
@@ -45,7 +45,7 @@ function uploadHandler(ctx) {
 }
 function staticImageHandler(ctx) {
   // 提供静态文件服务，返回上传的图片
-  const filePath = path.join(__dirname, ctx.url);
+  const filePath = path.join(__dirname, ctx.url.replace(/^\/api/, ""));
   if (fs.existsSync(filePath)) {
     ctx.type = path.extname(filePath); // 设置响应的 Content-Type
     ctx.body = fs.createReadStream(filePath); // 返回文件流
@@ -105,7 +105,7 @@ async function modelHandler(ctx) {
 app.use(async (ctx) => {
   if (ctx.method === "POST" && ctx.url === "/api/upload-image") {
     uploadHandler(ctx);
-  } else if (ctx.method === "GET" && ctx.url.startsWith("/uploads/")) {
+  } else if (ctx.method === "GET" && ctx.url.startsWith("/api/uploads/")) {
     staticImageHandler(ctx);
   } else if (ctx.method === "POST" && ctx.url === "/api/nodes") {
     await modelHandler(ctx);
