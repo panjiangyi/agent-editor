@@ -6,7 +6,7 @@ const path = require("path");
 const app = new Koa();
 const cors = require("@koa/cors");
 const { GeminiText, GeminiImage } = require("./gemini");
-const { gropImage } = require("./groq");
+const { baiduImage } = require("./baidu");
 const PORT = 3000;
 // 设置文件上传路径
 const uploadDir = path.join(__dirname, "/uploads");
@@ -65,7 +65,7 @@ async function modelHandler(ctx) {
     const type = node.type;
     console.log("start---", type);
     if (type === "ImageModel") {
-      lastResult = await gropImage(node.data.value);
+      lastResult = await baiduImage(node.data.value);
     } else {
       lastResult = await GeminiText(
         lastResult ? `${node.data.value}: ${lastResult}` : node.data.value

@@ -3,12 +3,13 @@ import { FC, useRef } from "react";
 import { Node } from "@xyflow/react";
 
 import { Upload } from "lucide-react";
-import { uploadFiles } from "../controller/store";
+import { uploadFiles, useResultStore } from "../controller/store";
 import clsx from "clsx";
 import useStore from "../controller/store";
 
 interface ImageUploadComponentProps {
   selected?: boolean;
+  id: string;
   value: string | null;
   onChange: (url: string | null) => void;
 }
@@ -17,7 +18,11 @@ function ImageUploadComponent({
   value,
   onChange,
   selected,
+  id,
 }: ImageUploadComponentProps) {
+  const { getResultById } = useResultStore();
+  const result = getResultById(id);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = async (
@@ -65,6 +70,9 @@ function ImageUploadComponent({
       <button onClick={handleUploadClick} className="w-full">
         {value ? "Change Image" : "Upload Image"}
       </button>
+      {result && (
+        <div className="w-full p-2 bg-gray-200 rounded">Output:{result}</div>
+      )}
     </div>
   );
 }
